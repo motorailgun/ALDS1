@@ -13,30 +13,28 @@ tmp = 0
 
 def calc_cost(depth, left_bound, right_bound)
     if !(tmp = @memo_mut[left_bound][right_bound]) then
-        @memo_mut[left_bound][right_bound] = tmp = calc_partialtree_count(1, left_bound, right_bound)  
+        @memo_mut[left_bound][right_bound] = tmp = calc_partialtree_count(left_bound, right_bound)  
     end
     return tmp + (depth - 1) * (@keys_folded[right_bound] - @keys_folded[left_bound - 1] + @dumkeys_folded[right_bound] - (left_bound - 2 >= 0 ? @dumkeys_folded[left_bound - 2] : 0))
 end
 
-def calc_partialtree_count(depth, left_bound, right_bound)
-    if tmp = @memo_mut[left_bound][right_bound] then
-        return tmp + (depth - 1) * (@keys_folded[right_bound] - @keys_folded[left_bound - 1] + @dumkeys_folded[right_bound] - (@dumkeys_folded[left_bound - 2] || 0))
-    elsif left_bound == right_bound then
-        return depth * @keys[left_bound] + (depth + 1) * (@dumkeys[left_bound - 1] + @dumkeys[left_bound])
+def calc_partialtree_count(left_bound, right_bound)
+    if left_bound == right_bound then
+        return @keys[left_bound] + 2 * (@dumkeys[left_bound - 1] + @dumkeys[left_bound])
     elsif right_bound - left_bound == 1 then
-        left_dum = depth * @keys[left_bound] + (depth + 1) * @dumkeys[left_bound - 1] + calc_cost(depth + 1, right_bound, right_bound)
-        right_dum = depth * @keys[right_bound] + (depth + 1) * @dumkeys[right_bound] + calc_cost(depth + 1, left_bound, left_bound)
+        left_dum = @keys[left_bound] + 2 * @dumkeys[left_bound - 1] + calc_cost(2, right_bound, right_bound)
+        right_dum = @keys[right_bound] + 2 * @dumkeys[right_bound] + calc_cost(2, left_bound, left_bound)
         return [left_dum, right_dum].min
     else
         min = nil
         @keys[(left_bound + 1)..(right_bound - 1)].each.with_index(left_bound + 1){|val, chaku|
-            tmp = depth * val + calc_cost(depth + 1, left_bound, chaku - 1) + calc_cost(depth + 1, chaku + 1, right_bound)
+            tmp = val + calc_cost(2, left_bound, chaku - 1) + calc_cost(2, chaku + 1, right_bound)
             if !min || min > tmp then
                 min = tmp
             end
         }
-        ls = depth * @keys[left_bound] + (depth + 1) * @dumkeys[left_bound - 1] + calc_cost(depth + 1, left_bound + 1, right_bound)
-        rs = depth * @keys[right_bound] + (depth + 1) * @dumkeys[right_bound] + calc_cost(depth + 1, left_bound, right_bound - 1)
+        ls = @keys[left_bound] + 2 * @dumkeys[left_bound - 1] + calc_cost(2, left_bound + 1, right_bound)
+        rs = @keys[right_bound] + 2 * @dumkeys[right_bound] + calc_cost(2, left_bound, right_bound - 1)
         return [min, ls, rs].min
     end
 end
