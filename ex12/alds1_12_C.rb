@@ -13,12 +13,12 @@ class Heap < Array
         l = i * 2
         r = i * 2 + 1
         smallest = i
-        smallest = l if self[l] && self[l][1] < self[i][1]
-        smallest = r if self[r] && self[r][1] < self[smallest][1]
+        smallest = l if (ll = self[l]) && ll[1] < self[i][1]
+        smallest = r if (rr = self[r]) && rr[1] < self[smallest][1]
 
         if smallest != i then
-            self.swap(i, smallest)
-            self.minheapfy(smallest)
+            self[smallest], self[i] = self[i], self[smallest]
+            minheapfy(smallest)
         end
     end
 
